@@ -4,18 +4,13 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const axios = require('axios');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use(bodyParser.json())
 
-app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    next();
-});
+app.use(cors());
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
@@ -23,16 +18,17 @@ app.get('/', (req, res) => {
 
 app.use(express.static(__dirname + '/scripts'));
 
-http.listen(3000, () => {
-    console.log('Listening on *:3000')
+http.listen(80, () => {
+    console.log('Listening on *:80')
 });
-
-const socketIds = [];
 
 io.on('connection', (socket) => {
     socket.on('Job Request', () => {
-        axios.get('http://localhost:3001/test1').then((resp) => {
-            socket.emit('feedback', { feedback: resp.data })
+        socket.emit('disable', {disable: true});
+        axios.get('http://localhost:81/queue-app')
+            .then((resp) => {
+                socket.emit('feedback', { feedback: resp.data })
+                socket.emit('enable');
         });
     });
 });
