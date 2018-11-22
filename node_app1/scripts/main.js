@@ -7,7 +7,6 @@
     })
 
     socket.on('feedback', (msg) => {
-        console.log(msg);
         $('p').text(msg.feedback)
     })
 
